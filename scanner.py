@@ -33,11 +33,11 @@ class ThreadClass(threading.Thread):
         self.packetcount = 0
 
     def run(self):
-        global running, active_queues
-        
+        global active_queues
         self.kb = KillerBee(device=self.dev, datasource="Wardrive Live")
         self.kb.set_channel(self.channel)
         self.kb.sniffer_on()
+
         print "Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel)
         
         # loop capturing packets to dblog and file
