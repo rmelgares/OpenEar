@@ -55,7 +55,7 @@ class ThreadClass(threading.Thread):
                 self.kb.dblog.add_packet(full=packet)
                 self.pd.pcap_dump(packet[0])
                 if arg_verbose:
-                    print "Packet %d on %d" % (self.packetcount, self.channel)
+                    print "Packet %d on channel %d" % (self.packetcount, self.channel)
         # trigger threading.Event set to false, so shutdown thread
         if arg_verbose:
             print "%s on channel %d shutting down..." % (threading.currentThread().getName(), self.channel)
