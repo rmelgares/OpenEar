@@ -38,7 +38,7 @@ class ThreadClass(threading.Thread):
         self.kb.set_channel(self.channel)
         self.kb.sniffer_on()
 
-        print "Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel)
+        #print "Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel)
         
         # loop capturing packets to dblog and file
         message = ""
@@ -55,7 +55,7 @@ class ThreadClass(threading.Thread):
                 self.kb.dblog.add_packet(full=packet)
                 self.pd.pcap_dump(packet[0])
                 if arg_verbose:
-                    print "Packet %d on channel %d" % (self.packetcount, self.channel)
+                    print chr(0x1b) + "[%d;5fChannel %d: %d packets captured" % (self.channel - 9, self.channel, self.packetcount)
         # trigger threading.Event set to false, so shutdown thread
         if arg_verbose:
             print "%s on channel %d shutting down..." % (threading.currentThread().getName(), self.channel)
@@ -77,8 +77,6 @@ def main(args):
         op = args.pop(1)
         if op == '-v':
             arg_verbose = True
-    if arg_verbose:
-        print "Verbose on."
 
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -95,7 +93,10 @@ def main(args):
             t = ThreadClass(kbdev_info[i][0], channel, pcap)
             t.start()
             channel += 1
-
+    print "Waiting for devices to initialize..."
+    time.sleep(6)
+    os.system('clear')
+    print chr(0x1b) + "[1;5fLive Stats:"
     while True: pass
 
 if __name__ == '__main__':
