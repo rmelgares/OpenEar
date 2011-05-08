@@ -50,6 +50,8 @@ class LocationThread(threading.Thread):
             latitude = session.fix.latitude
             longitude = session.fix.longitude
             altitude = session.fix.altitude
+            print chr(0x1b) + "[2;5fLat: %f, Long: %f, Alt: %f." % (latitude, longitude, altitude)
+
             time.sleep(2)
  
 
@@ -93,7 +95,7 @@ class CaptureThread(threading.Thread):
                     self.kb.dblog.add_packet(full=packet)
                 self.pd.pcap_dump(packet[0])
                 if arg_verbose:
-                    print chr(0x1b) + "[%d;5fChannel %d: %d packets captured. Lat: %f, Long: %f, Alt: %f." % (self.channel - 9, self.channel, self.packetcount, latitude, longitude, altitude)
+                    print chr(0x1b) + "[%d;5fChannel %d: %d packets captured." % (self.channel - 8, self.channel, self.packetcount)
         # trigger threading.Event set to false, so shutdown thread
         if arg_verbose:
             print "%s on channel %d shutting down..." % (threading.currentThread().getName(), self.channel)
@@ -104,6 +106,7 @@ class CaptureThread(threading.Thread):
 
 def signal_handler(signal, frame):
     ''' Signal handler called on keyboard interrupt to exit threads and exit scanner script'''
+    os.system('clear') 
     broadcast_event("shutdown")
     time.sleep(1)
     sys.exit(0)
@@ -139,9 +142,9 @@ def main(args):
     #    time.sleep(2)
 
     if arg_gps:
-        kbdev_info = kb_dev_list(gps=arg_gps_devstring)
+        kbdev_info = kbutils.devlist(gps=arg_gps_devstring)
     else:
-        kbdev_info = kb_dev_list()
+        kbdev_info = kbutils.devlist()
     channel = 11
     print "Found %d devices." % len(kbdev_info)
     if len(kbdev_info) < 1:
@@ -171,7 +174,7 @@ def main(args):
                 t.start()
                 channel += 1
     print "Waiting for devices to initialize..."
-    time.sleep(6)
+    time.sleep(4)
     os.system('clear')
     print chr(0x1b) + "[1;5fLive Stats:"
     while True: pass
