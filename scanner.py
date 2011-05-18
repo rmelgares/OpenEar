@@ -4,8 +4,7 @@
 # Promiscious capture on multiple channels at once
 
 import gps, time, os, signal, sys, operator, threading
-import string, socket, struct, bitstring
-from datetime import datetime
+import string, socket, struct, bitstring, datetime
 
 from killerbee import *
 import Queue
@@ -19,6 +18,7 @@ arg_gps_devstring = ""
 latitude = ""
 longitude = ""
 altitude = ""
+last_seen = ""
 
 def broadcast_event(data):
     ''' Send broadcast data to all active threads '''
@@ -37,8 +37,9 @@ class LocationThread(threading.Thread):
     def run(self):
         global session
         global active_queues
-        global longitude, latitude, altitude
+        global longitude, latitude, altitude, last_seen
         message = ""
+        last_seen = datetime.datetime.now()
         while(1):
             try:
                 message = self.mesg.get(timeout=.00001)
@@ -47,10 +48,19 @@ class LocationThread(threading.Thread):
             if message == "shutdown":
                 break
             session.poll()
-            latitude = session.fix.latitude
-            longitude = session.fix.longitude
-            altitude = session.fix.altitude
-            print chr(0x1b) + "[2;5fLat: %f, Long: %f, Alt: %f." % (latitude, longitude, altitude)
+            t_latitude = session.fix.latitude
+            t_longitude = session.fix.longitude
+            t_altitude = session.fix.altitude
+            if(t_latitude != latitude and t_longitude != longitude and t_altitude != altitude):
+                latitude  = t_latitude
+                longitude = t_longitude
+                altitude  = t_altitude
+                last_seen = datetime.datetime.now()
+            else:
+                end_time = datetime.datetime.now()
+                elapsed_time = end_time - last_seen
+                print chr(0x1b) + "[2;5fLast change seen %d seconds ago." % elapsed_time 
+            print chr(0x1b) + "[3;5fLat: %f, Long: %f, Alt: %f." % (latitude, longitude, altitude)
 
             time.sleep(2)
  
@@ -95,7 +105,7 @@ class CaptureThread(threading.Thread):
                     self.kb.dblog.add_packet(full=packet)
                 self.pd.pcap_dump(packet[0])
                 if arg_verbose:
-                    print chr(0x1b) + "[%d;5fChannel %d: %d packets captured." % (self.channel - 8, self.channel, self.packetcount)
+                    print chr(0x1b) + "[%d;5fChannel %d: %d packets captured." % (self.channel - 7, self.channel, self.packetcount)
         # trigger threading.Event set to false, so shutdown thread
         if arg_verbose:
             print "%s on channel %d shutting down..." % (threading.currentThread().getName(), self.channel)
@@ -167,7 +177,7 @@ def main(args):
                 print 'Device at %s: \'%s\'' % (kbdev_info[i][0], kbdev_info[i][1])
                 if channel <= 26:
                     print '\tAssigning to channel %d.' % channel
-                timeLabel = datetime.now().strftime('%Y%m%d-%H%M')
+                timeLabel = datetime.datetime.now().strftime('%Y%m%d-%H%M')
                 fname = 'zb_c%s_%s.pcap' % (channel, timeLabel) #fname is -w equiv
                 pcap = PcapDumper(DLT_IEEE802_15_4, fname)
                 t = CaptureThread(kbdev_info[i][0], channel, pcap)
