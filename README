@@ -17,3 +17,6 @@ options
 
 example usage
     sudo ./scanner.py -g /dev/ttyUSB0
+
+bugs/todo
+    There is an issue with something in the gpsd python bindings that causes the latitude, longitude, and altitude coordinates to stop updating after 20 or so minutes of operation. When this happens, a simple restart of the scanner application fixes the problem, so most likely an issue with the location thread getting hung for some reason.
