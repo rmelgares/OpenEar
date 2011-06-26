@@ -6,6 +6,11 @@ Requirements:
 
 802.15.4 channel monitor extension for use with KillerBee 2.0: threaded application that assigns a channel and starts a capture for each attached device (need 16 for an all channel monitor), tags location information from gpsd if flag is specified.
 
+files
+    gps/: gpsd python bindings/libraries
+    scanner.py: standalone channel monitor application
+    gps.py: example program for interacting with gpsd
+
 options
     -v	verbose
     -g  specify gps device (otherwise killerbee will fuzz gpsd when identifying/initializing killerbee devices)
