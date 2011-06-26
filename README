@@ -1,0 +1,14 @@
+OpenEar by Ricky Melgares
+
+Requirements:
+    KillerBee 2.0 (http://code.google.com/p/killerbee/)
+    gpsd (http://gpsd.berlios.de/) - tested with version 2.94
+
+802.15.4 channel monitor extension for use with KillerBee 2.0: threaded application that assigns a channel and starts a capture for each attached device (need 16 for an all channel monitor), tags location information from gpsd if flag is specified.
+
+options
+    -v	verbose
+    -g  specify gps device (otherwise killerbee will fuzz gpsd when identifying/initializing killerbee devices)
+
+example usage
+    sudo ./scanner.py -g /dev/ttyUSB0
